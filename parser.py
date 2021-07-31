@@ -16,9 +16,11 @@ def get_content(html):
     items = soup.find_all('a', class_='ref_goods_n_p j-open-full-product-card')
     # print(items)
     for item in items:
-        print(item.find('div', slass_='dtlist-inner-brand'))
-        break
-
+        if item.find('span', class_='goods-name c-text-sm').get_text(strip=True) == SEARCHED_ELEMENT:
+            link = item.get('href')
+            prise = item.find('span', class_='price')
+            print(link, prise)
+            break
 
 
 def parse():
