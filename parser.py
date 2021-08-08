@@ -7,9 +7,9 @@ URL_VAMPOLEZNO = 'https://vampolezno.com/polezzno/'
 HEADERS = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/91.0.4472.135 YaBrowser/21.6.2.855 Yowser/2.5 Safari/537.36', 'accept' : '*/*'}
 
-SEARCHED_ELEMENT = ('Чай матча зеленая/рассыпной', 'Чай матча голубая', 'Кисель')
-# searched_element = SEARCHED_ELEMENT[2]
-searched_element = 'Розовая матча порошок питахайи 100 г'
+# SEARCHED_ELEMENT = ('Чай матча зеленая/рассыпной', 'Чай матча голубая', 'Кисель')
+# # searched_element = SEARCHED_ELEMENT[2]
+searched_element = 'матча'
 
 HOST_WILDBERRIES = 'https://www.wildberries.ru'
 HOST_VAMPOLEZNO = 'https://vampolezno.com'
@@ -31,7 +31,7 @@ def get_content_waldberries(html):
     items = soup.find_all('a', class_='ref_goods_n_p j-open-full-product-card')
     for item in items:
         # print(item.find('span', class_='goods-name').get_text(strip=True))
-        if item.find('span', class_='goods-name').get_text(strip=True) == searched_element:
+        if searched_element in item.find('span', class_='goods-name').get_text(strip=True):
             # print(item.find('span', class_='goods-name').get_text(strip=True))
             link = HOST_WILDBERRIES + item.get('href')
             prise = item.find('span', class_='price').get_text(strip=True)
@@ -48,7 +48,7 @@ def get_content_vampolezno(html):
     items = soup.find_all('li', class_='tabs-shadow-category')
     for item in items:
         # print(item.find('h5').get_text(strip=True))
-        if item.find('h5').get_text(strip=True) == searched_element:
+        if searched_element in item.find('h5').get_text(strip=True):
             link = HOST_VAMPOLEZNO + item.find('a').get('href')
             prise = item.find('div', class_='pricing radiocard prcb-single').get_text(strip=True)
             print(f'Товар на сайте {HOST_VAMPOLEZNO} найден.')
