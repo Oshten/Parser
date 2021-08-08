@@ -25,6 +25,13 @@ def get_pagination_next(html, host):
     page_next = host + soup.find('a', class_='pagination-next').get('href')
     return page_next
 
+def get_pagination_cout(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    page_cout = int(soup.find('ul', class_='menu-h').get_text()[-2])
+    return page_cout
+
+
+
 def record_info(prise, link, shop_name, produkt):
     with open(FILE, 'a', encoding='utf8') as file:
         # shope_name = host.split('.')[1]
@@ -44,11 +51,11 @@ def get_content_waldberries(html):
             print(f'Товар на сайте {HOST_WILDBERRIES} найден.')
             record_info(prise=prise, link=link, shop_name='Wildberries', produkt=produkt)
 
-def parse_waldberries(url, func):
-    html = get_html(url=url)
+def parse_waldberries():
+    html = get_html(url=URL_WILDBERRIES)
     if html.status_code == 200:
         while True:
-            func(html=html.text)
+            get_content_waldberries(html=html.text)
             try:
                 page_next = get_pagination_next(html=html.text, host=HOST_WILDBERRIES)
                 html = get_html(url=page_next)
@@ -62,6 +69,7 @@ def get_content_vampolezno(html):
     print('Идет парсинг ...')
     soup = BeautifulSoup(html, 'html.parser')
     items = soup.find_all('li', class_='tabs-shadow-category')
+    print(len(items))
     for item in items:
         # print(item.find('h5').get_text(strip=True))
         if searched_element in item.find('h5').get_text(strip=True):
@@ -71,25 +79,26 @@ def get_content_vampolezno(html):
             print(f'Товар на сайте {HOST_VAMPOLEZNO} найден.')
             record_info(prise=prise, link=link, shop_name='Vampolezno', produkt=produkt)
 
-def parse_vampolezno(url, func, host):
-    html = get_html(url=url)
+def parse_vampolezno():
+    html = get_html(url=URL_VAMPOLEZNO)
     if html.status_code == 200:
-        while True:
-            func(html=html.text)
-            try:
-                page_next = get_pagination_next(html=html.text, host=host)
-                html = get_html(url=page_next)
-            except AttributeError:
-                print('Все страницы проверены')
-                break
+        page_cout = get_pagination_cout(html=html.text)
+        for page in range(1, page_cout+1):
+            if page == 1:
+                get_content_vampolezno(html=html.text)
+                continue
+            html = get_html(url=URL_VAMPOLEZNO, params=f'page={page}')
+            get_content_vampolezno(html=html.text)
+        else:
+            print('Все страницы проверены')
     else:
         print('Страница не доступна')
 
 
 
 
-parse_waldberries(url = URL_WILDBERRIES, func=get_content_waldberries)
-parse_vampolezno(url = URL_VAMPOLEZNO, func=get_content_vampolezno, host=HOST_VAMPOLEZNO)
+parse_waldberries()
+parse_vampolezno()
 
 # url = URL_VAMPOLEZNO
 # html = get_html(url=url, params=None)
