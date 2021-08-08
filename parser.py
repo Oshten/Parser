@@ -20,9 +20,9 @@ def get_html(url, params = None):
     result = requests.get(url=url, headers = HEADERS, params=params)
     return result
 
-def get_pagination_next(html):
+def get_pagination_next(html, host):
     soup = BeautifulSoup(html, 'html.parser')
-    page_next = HOST_WILDBERRIES + soup.find('a', class_='pagination-next').get('href')
+    page_next = host + soup.find('a', class_='pagination-next').get('href')
     return page_next
 
 def get_content_waldberries(html):
@@ -32,14 +32,12 @@ def get_content_waldberries(html):
     for item in items:
         # print(item.find('span', class_='goods-name').get_text(strip=True))
         if searched_element in item.find('span', class_='goods-name').get_text(strip=True):
+            produkt = item.find('span', class_='goods-name').get_text(strip=True)
             # print(item.find('span', class_='goods-name').get_text(strip=True))
             link = HOST_WILDBERRIES + item.get('href')
             prise = item.find('span', class_='price').get_text(strip=True)
             print(f'Товар на сайте {HOST_WILDBERRIES} найден.')
-            # print(link, prise)
-            return prise, link
-    else:
-        return False
+            record_info(prise=prise, link=link, shop_name='Wildberries', produkt=produkt)
 
 
 def get_content_vampolezno(html):
@@ -49,46 +47,39 @@ def get_content_vampolezno(html):
     for item in items:
         # print(item.find('h5').get_text(strip=True))
         if searched_element in item.find('h5').get_text(strip=True):
+            produkt = item.find('h5').get_text(strip=True)
             link = HOST_VAMPOLEZNO + item.find('a').get('href')
             prise = item.find('div', class_='pricing radiocard prcb-single').get_text(strip=True)
             print(f'Товар на сайте {HOST_VAMPOLEZNO} найден.')
-            # print(link, prise)
-            return prise, link
-    else:
-        return False
+            record_info(prise=prise, link=link, shop_name='Vampolezno', produkt=produkt)
 
 
 
-def record_info(file_info, prise, link, host):
-    with open(file_info, 'a', encoding='utf8') as file:
+def record_info(prise, link, shop_name, produkt):
+    with open(FILE, 'a', encoding='utf8') as file:
         # shope_name = host.split('.')[1]
-        file.write(host + '\n' + searched_element + '\n' + prise + '\n' + link + '\n' + '\n\n\n')
+        file.write(shop_name + '\n' + produkt + '\n' + prise + '\n' + link + '\n' + '\n\n\n')
 
 
 def parse(url, func, host):
     html = get_html(url=url)
     if html.status_code == 200:
         while True:
+            func(html=html.text)
             try:
-                prise, link = func(html=html.text)
+                page_next = get_pagination_next(html=html.text, host=host)
+                html = get_html(url=page_next)
+            except AttributeError:
+                print('Все страницы проверены')
                 break
-            except TypeError:
-                try:
-                    page_next = get_pagination_next(html=html.text)
-                    html = get_html(url=page_next)
-                except AttributeError:
-                    print(f'Товар на сайте не найден.')
-                    prise, link = 'Товар отсутствует', 'Товар отсутствует'
-                    break
-        record_info(file_info=FILE, prise=prise, link=link, host=host)
     else:
         print('Страница не доступна')
 
 
 
 
-parse(url = URL_WILDBERRIES, func=get_content_waldberries, host='Wildberries')
-parse(url = URL_VAMPOLEZNO, func=get_content_vampolezno, host='Vampolezno')
+parse(url = URL_WILDBERRIES, func=get_content_waldberries, host=HOST_WILDBERRIES)
+parse(url = URL_VAMPOLEZNO, func=get_content_vampolezno, host=HOST_VAMPOLEZNO)
 
 # url = URL_VAMPOLEZNO
 # html = get_html(url=url, params=None)
