@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 
 URL_WILDBERRIES = 'https://www.wildberries.ru/brands/polezzno'
 URL_VAMPOLEZNO = 'https://vampolezno.com/polezzno/'
+URL_FOURFRESH = 'https://4fresh.ru/catalog/food'
+
+
 HEADERS = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/91.0.4472.135 YaBrowser/21.6.2.855 Yowser/2.5 Safari/537.36', 'accept' : '*/*'}
 
@@ -13,6 +16,7 @@ searched_element = 'матча'
 
 HOST_WILDBERRIES = 'https://www.wildberries.ru'
 HOST_VAMPOLEZNO = 'https://vampolezno.com'
+HOST_FOURFRESH = ''
 
 FILE = 'Информация о ценах.txt'
 
@@ -94,11 +98,39 @@ def parse_vampolezno():
     else:
         print('Страница не доступна')
 
+def get_content_fourfresh(html):
+    print('Идет парсинг ...')
+    soup = BeautifulSoup(html, 'html.parser')
+    items = soup.find_all('article', class_='prod-card-small')
+    for item in items:
+        # print(item.find('a', class_='ci-list-item__name').get_text(strip=True))
+        if searched_element in item.find('a', class_='ci-list-item__name').get_text(strip=True):
+            produkt = item.find('h5').get_text(strip=True)
+            link = HOST_VAMPOLEZNO + item.find('a').get('href')
+            prise = item.find('div', class_='pricing radiocard prcb-single').get_text(strip=True)
+    #         print(f'Товар на сайте {HOST_VAMPOLEZNO} найден.')
+    #         record_info(prise=prise, link=link, shop_name='Vampolezno', produkt=produkt)
+
+def parse_fourfresh():
+    html = get_html(url=URL_FOURFRESH)
+    if html.status_code == 200:
+        # page_cout = get_pagination_cout(html=html.text)
+        get_content_fourfresh(html=html.text)
+        # for page in range(1, page_cout+1):
+        #     if page == 1:
+        #         get_content_vampolezno(html=html.text)
+        #         continue
+        #     html = get_html(url=URL_VAMPOLEZNO, params=f'page={page}')
+        #     get_content_vampolezno(html=html.text)
+        # else:
+        #     print('Все страницы проверены')
+    else:
+        print('Страница не доступна')
 
 
-
-parse_waldberries()
-parse_vampolezno()
+# parse_waldberries()
+# parse_vampolezno()
+parse_fourfresh()
 
 # url = URL_VAMPOLEZNO
 # html = get_html(url=url, params=None)
