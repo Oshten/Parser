@@ -6,7 +6,8 @@ URL_WILDBERRIES = 'https://www.wildberries.ru/brands/polezzno'
 HEADERS = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/91.0.4472.135 YaBrowser/21.6.2.855 Yowser/2.5 Safari/537.36', 'accept' : '*/*'}
 
-SEARCHED_ELEMENT = 'Чай матча сломатча зеленая/рассыпной'
+SEARCHED_ELEMENT = ('Чай матча зеленая/рассыпной', 'Чай матча голубая', 'Кисель')
+searched_element = SEARCHED_ELEMENT[2]
 
 HOST_WILDBERRIES = 'https://www.wildberries.ru'
 
@@ -27,7 +28,7 @@ def get_content(html):
     items = soup.find_all('a', class_='ref_goods_n_p j-open-full-product-card')
     for item in items:
         # print(item.find('span', class_='goods-name').get_text(strip=True))
-        if item.find('span', class_='goods-name').get_text(strip=True) == SEARCHED_ELEMENT:
+        if item.find('span', class_='goods-name').get_text(strip=True) == searched_element:
             # print(item.find('span', class_='goods-name').get_text(strip=True))
             link = HOST_WILDBERRIES + item.get('href')
             prise = item.find('span', class_='price').get_text(strip=True)
@@ -42,7 +43,7 @@ def get_content(html):
 def record_info(file_info, prise, link):
     with open(file_info, 'a', encoding='utf8') as file:
         shope_name = HOST_WILDBERRIES.split('.')[1]
-        file.write(shope_name + '\n' + SEARCHED_ELEMENT + '\n' + prise + '\n' + link + '\n' + '\n\n\n')
+        file.write(shope_name + '\n' + searched_element + '\n' + prise + '\n' + link + '\n' + '\n\n\n')
 
 
 def parse():
@@ -52,7 +53,7 @@ def parse():
             try:
                 prise, link = get_content(html=html.text)
                 break
-            except:
+            except TypeError:
                 try:
                     page_next = get_pagination_next(html=html.text)
                     html = get_html(url=page_next)
@@ -68,7 +69,7 @@ def parse():
 parse()
 
 # url = 'https://www.wildberries.ru/brands/polezzno'
-# html = get_html(url=url, params=None)
-# get_content(html=html.text)
-# # print(prise, link)
-# # print(get_pagination_next(html=html.text))
+# html = get_html(url=url, params='page=1')
+# prise, link = get_content(html=html.text)
+# print(prise, link)
+# print(get_pagination_next(html=html.text))
