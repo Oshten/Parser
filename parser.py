@@ -25,6 +25,11 @@ def get_pagination_next(html, host):
     page_next = host + soup.find('a', class_='pagination-next').get('href')
     return page_next
 
+def record_info(prise, link, shop_name, produkt):
+    with open(FILE, 'a', encoding='utf8') as file:
+        # shope_name = host.split('.')[1]
+        file.write(shop_name + '\n' + produkt + '\n' + prise + '\n' + link + '\n' + '\n\n\n')
+
 def get_content_waldberries(html):
     print('Идет парсинг ...')
     soup = BeautifulSoup(html, 'html.parser')
@@ -39,6 +44,19 @@ def get_content_waldberries(html):
             print(f'Товар на сайте {HOST_WILDBERRIES} найден.')
             record_info(prise=prise, link=link, shop_name='Wildberries', produkt=produkt)
 
+def parse_waldberries(url, func):
+    html = get_html(url=url)
+    if html.status_code == 200:
+        while True:
+            func(html=html.text)
+            try:
+                page_next = get_pagination_next(html=html.text, host=HOST_WILDBERRIES)
+                html = get_html(url=page_next)
+            except AttributeError:
+                print('Все страницы проверены')
+                break
+    else:
+        print('Страница не доступна')
 
 def get_content_vampolezno(html):
     print('Идет парсинг ...')
@@ -53,15 +71,7 @@ def get_content_vampolezno(html):
             print(f'Товар на сайте {HOST_VAMPOLEZNO} найден.')
             record_info(prise=prise, link=link, shop_name='Vampolezno', produkt=produkt)
 
-
-
-def record_info(prise, link, shop_name, produkt):
-    with open(FILE, 'a', encoding='utf8') as file:
-        # shope_name = host.split('.')[1]
-        file.write(shop_name + '\n' + produkt + '\n' + prise + '\n' + link + '\n' + '\n\n\n')
-
-
-def parse(url, func, host):
+def parse_vampolezno(url, func, host):
     html = get_html(url=url)
     if html.status_code == 200:
         while True:
@@ -78,8 +88,8 @@ def parse(url, func, host):
 
 
 
-parse(url = URL_WILDBERRIES, func=get_content_waldberries, host=HOST_WILDBERRIES)
-parse(url = URL_VAMPOLEZNO, func=get_content_vampolezno, host=HOST_VAMPOLEZNO)
+parse_waldberries(url = URL_WILDBERRIES, func=get_content_waldberries)
+parse_vampolezno(url = URL_VAMPOLEZNO, func=get_content_vampolezno, host=HOST_VAMPOLEZNO)
 
 # url = URL_VAMPOLEZNO
 # html = get_html(url=url, params=None)
