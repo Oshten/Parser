@@ -12,11 +12,11 @@ HEADERS = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit
 
 # SEARCHED_ELEMENT = ('Чай матча зеленая/рассыпной', 'Чай матча голубая', 'Кисель')
 # # searched_element = SEARCHED_ELEMENT[2]
-searched_element = 'матча'
+searched_element = 'масло' #'матча'
 
 HOST_WILDBERRIES = 'https://www.wildberries.ru'
 HOST_VAMPOLEZNO = 'https://vampolezno.com'
-HOST_FOURFRESH = ''
+HOST_FOURFRESH = 'https://4fresh.ru'
 
 FILE = 'Информация о ценах.txt'
 
@@ -105,11 +105,12 @@ def get_content_fourfresh(html):
     for item in items:
         # print(item.find('a', class_='ci-list-item__name').get_text(strip=True))
         if searched_element in item.find('a', class_='ci-list-item__name').get_text(strip=True):
-            produkt = item.find('h5').get_text(strip=True)
-            link = HOST_VAMPOLEZNO + item.find('a').get('href')
-            prise = item.find('div', class_='pricing radiocard prcb-single').get_text(strip=True)
-    #         print(f'Товар на сайте {HOST_VAMPOLEZNO} найден.')
-    #         record_info(prise=prise, link=link, shop_name='Vampolezno', produkt=produkt)
+            produkt = item.find('a', class_='ci-list-item__name').get_text(strip=True)
+            link = HOST_FOURFRESH + item.find('a').get('href')
+            prise = item.find('div', class_='ci-actual-price').get_text(strip=True)
+            print(f'Товар на сайте {HOST_FOURFRESH} найден.')
+            print(link, prise)
+            record_info(prise=prise, link=link, shop_name='4fresh', produkt=produkt)
 
 def parse_fourfresh():
     html = get_html(url=URL_FOURFRESH)
