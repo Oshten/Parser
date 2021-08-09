@@ -12,7 +12,7 @@ HEADERS = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit
 
 # SEARCHED_ELEMENT = ('Чай матча зеленая/рассыпной', 'Чай матча голубая', 'Кисель')
 # # searched_element = SEARCHED_ELEMENT[2]
-searched_element = 'масло' #'матча'
+searched_element = 'матча'
 
 HOST_WILDBERRIES = 'https://www.wildberries.ru'
 HOST_VAMPOLEZNO = 'https://vampolezno.com'
@@ -29,10 +29,15 @@ def get_pagination_next(html, host):
     page_next = host + soup.find('a', class_='pagination-next').get('href')
     return page_next
 
-def get_pagination_cout(html):
+def get_pagination_vampolezno(html):
     soup = BeautifulSoup(html, 'html.parser')
     page_cout = int(soup.find('ul', class_='menu-h').get_text()[-2])
     return page_cout
+
+def get_pagination_fourfresh(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    page_next = HOST_FOURFRESH + soup.find('a', class_='next').get('href')
+    return page_next
 
 
 
@@ -86,7 +91,7 @@ def get_content_vampolezno(html):
 def parse_vampolezno():
     html = get_html(url=URL_VAMPOLEZNO)
     if html.status_code == 200:
-        page_cout = get_pagination_cout(html=html.text)
+        page_cout = get_pagination_vampolezno(html=html.text)
         for page in range(1, page_cout+1):
             if page == 1:
                 get_content_vampolezno(html=html.text)
@@ -115,22 +120,21 @@ def get_content_fourfresh(html):
 def parse_fourfresh():
     html = get_html(url=URL_FOURFRESH)
     if html.status_code == 200:
-        # page_cout = get_pagination_cout(html=html.text)
-        get_content_fourfresh(html=html.text)
-        # for page in range(1, page_cout+1):
-        #     if page == 1:
-        #         get_content_vampolezno(html=html.text)
-        #         continue
-        #     html = get_html(url=URL_VAMPOLEZNO, params=f'page={page}')
-        #     get_content_vampolezno(html=html.text)
-        # else:
-        #     print('Все страницы проверены')
+        while True:
+            get_content_fourfresh(html=html.text)
+            # try:
+            page_next = get_pagination_fourfresh(html=html.text)
+            print(page_next)
+            html = get_html(url=page_next)
+            # except:
+            #     print('Все страницы проверены')
+            #     break
     else:
         print('Страница не доступна')
 
 
-# parse_waldberries()
-# parse_vampolezno()
+parse_waldberries()
+parse_vampolezno()
 parse_fourfresh()
 
 # url = URL_VAMPOLEZNO
