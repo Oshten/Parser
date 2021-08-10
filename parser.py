@@ -109,13 +109,12 @@ def parse_vampolezno():
     else:
         print('Страница не доступна')
 
-def get_content_fourfresh(html, produkt_coul):
+def get_content_fourfresh(html):
     print('Идет парсинг ...')
     soup = BeautifulSoup(html, 'html.parser')
     items = soup.find_all('article', class_='prod-card-small')
     for item in items:
         # print(item.find('a', class_='ci-list-item__name').get_text(strip=True))
-        produkt_coul += 1
         if searched_element in item.find('a', class_='ci-list-item__name').get_text(strip=True):
             produkt = item.find('a', class_='ci-list-item__name').get_text(strip=True)
             link = HOST_FOURFRESH + item.find('a').get('href')
@@ -123,18 +122,19 @@ def get_content_fourfresh(html, produkt_coul):
             print(f'Товар на сайте {HOST_FOURFRESH} найден.')
             print(link, prise)
             record_info(prise=prise, link=link, shop_name='4fresh', produkt=produkt)
-    return produkt_coul
 
 def parse_fourfresh():
     html = get_html(url=URL_FOURFRESH)
     if html.status_code == 200:
         produkt_total = total_produkt_fourfresh(html=html.text)
         produkt_coul = 0
-        while produkt_total <= produkt_coul:
-            produkt_coul += get_content_fourfresh(html=html.text, produkt_coul=produkt_coul)
+        while produkt_coul <= produkt_total:
+            get_content_fourfresh(html=html.text)
+            produkt_coul += 30
             page_next = get_pagination_fourfresh(html=html.text)
-            print(page_next)
+            # print(page_next)
             html = get_html(url=page_next)
+            print(f'Проверено {produkt_coul} товаров.')
     else:
         print('Страница не доступна')
 
