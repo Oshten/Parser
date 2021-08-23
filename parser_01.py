@@ -71,7 +71,7 @@ class ParserWaldberries(Parser):
 
     def search_product(self):
         items = self.contents.find_all('a', class_='product-card__main')
-        # print(items)
+        print(items)
         for item in items:
             # print(item.find('span', class_='goods-name').get_text(strip=True))
             if self.find_product in item.find('span', class_='goods-name').get_text(strip=True):
@@ -92,6 +92,35 @@ class ParserWaldberries(Parser):
             # print(self.link)
         except AttributeError:
             self.link = None
+
+class ParserFourfresh(Parser):
+
+    def __init__(self, url, shope_name, find_product):
+        super().__init__(url, shope_name, find_product)
+        self.produkt_coul = 0
+        self.total = None
+
+    def search_product(self):
+        print(f'Идет парсинг страницы {self.url}...')
+        items = self.contents.find_all('article', class_='prod-card-small')
+        for item in items:
+            # print(item.find('a', class_='ci-list-item__name').get_text(strip=True))
+            if self.find_product in item.find('a', class_='ci-list-item__name').get_text(strip=True):
+                self.product = item.find('a', class_='ci-list-item__name').get_text(strip=True)
+                self.link_product = HOST_FOURFRESH + item.find('a').get('href')
+                self.prise = item.find('div', class_='ci-actual-price').get_text(strip=True)
+                print(f'Товар на сайте {self.shope_name} найден.')
+                # print(link, prise)
+                self.record_info()
+
+    def find_next_url(self):
+        self.link = HOST_FOURFRESH + self.contents.find('a', class_='next').get('href')
+
+
+
+    # def total_produkt(self):
+    #     total_produkt = self.contents.find('span', class_='showing').get_text(strip=True)
+    #     self.total = int(total_produkt.split(' ')[-1])
 
 
 
@@ -218,7 +247,12 @@ class ParserWaldberries(Parser):
 # # print(prise, link)
 # # print(get_pagination_next(html=html.text))
 
-parser_waldberris = ParserWaldberries(url = URL_WILDBERRIES,
-                                      shope_name='Wildberries',
+# parser_waldberris = ParserWaldberries(url = URL_WILDBERRIES,
+#                                       shope_name='Wildberries',
+#                                       find_product=searched_element)
+# parser_waldberris.run()
+
+parser_fourfresh = ParserFourfresh(url = URL_FOURFRESH,
+                                      shope_name='Fourfresh',
                                       find_product=searched_element)
-parser_waldberris.run()
+parser_fourfresh.run()
