@@ -41,11 +41,13 @@ class Parser:
         self.html = requests.get(url=self.url, headers = self.headers, params=self.params)
         if self.html.status_code == 200:
             self.get_content()
-            # self.search_product()
+            self.search_product()
             self.find_next_url()
-            # if self.link and self.link != self.url:
-            #     parser = Parser(url=self.link, shope_name=self.shope_name, find_product=self.find_product)
-            #     parser.run()
+            if self.link and self.link != self.url:
+                parser = Parser(url=self.link, shope_name=self.shope_name, find_product=self.find_product)
+                parser.run()
+            else:
+                print('Все страницы проверены')
         else:
             print(f'Страница {self.url} не доступна')
 
@@ -89,8 +91,8 @@ class ParserWaldberries(Parser):
             self.link = HOST_WILDBERRIES + self.contents.find('a', class_='catalog-pagination__next').get('href')
             # print(self.link)
         except AttributeError:
-            print('Все страницы проверены')
             self.link = None
+
 
 
 
@@ -220,4 +222,3 @@ parser_waldberris = ParserWaldberries(url = URL_WILDBERRIES,
                                       shope_name='Wildberries',
                                       find_product=searched_element)
 parser_waldberris.run()
-print(parser_waldberris.link)
