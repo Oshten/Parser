@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -45,7 +47,7 @@ class Parser:
             self.get_content()
             self.search_product()
             self.find_next_url()
-            print(self.link)
+            # print(self.link)
             if self.link and self.link != self.url:
                 parser = Parser(url=self.link, shope_name=self.shope_name, find_product=self.find_product)
                 parser.run()
@@ -74,25 +76,26 @@ class ParserWaldberries(Parser):
 
     def search_product(self):
         items = self.contents.find_all('a', class_='product-card__main')
-        print(items)
+        # print(items)
         for item in items:
             # print(item.find('span', class_='goods-name').get_text(strip=True))
             if self.find_product in item.find('span', class_='goods-name').get_text(strip=True):
                 self.product = item.find('span', class_='goods-name').get_text(strip=True)
                 # print(self.product)
-                self.link_priduct = HOST_WILDBERRIES + item.get('href')
-                # print(self.link_product)
+                self.link_priduct = urljoin(base=HOST_WILDBERRIES, url=item.get('href'))
+                print(self.link_product)
                 self.prise = item.find('span', class_='price').get_text(strip=True)
                 # print(self.prise)
-                print(f'Товар на сайте {HOST_WILDBERRIES} найден.')
+                print(f'Товар на сайте {self.shope_name} найден.')
                 self.record_info()
 
     def find_next_url(self):
         # print(self.contents)
         # self.contents.find('a', class_='pagination-item').get_text()
         try:
-            self.link = HOST_WILDBERRIES + self.contents.find('a', class_='catalog-pagination__next').get('href')
-            # print(self.link)
+            self.link = urljoin(base=HOST_WILDBERRIES,
+                                url=self.contents.find('a', class_='catalog-pagination__next').get('href'))
+            print(self.link)
         except AttributeError:
             self.link = None
 
@@ -109,14 +112,14 @@ class ParserFourfresh(Parser):
             # print(item.find('a', class_='ci-list-item__name').get_text(strip=True))
             if self.find_product in item.find('a', class_='ci-list-item__name').get_text(strip=True):
                 self.product = item.find('a', class_='ci-list-item__name').get_text(strip=True)
-                self.link_product = HOST_FOURFRESH + item.find('a').get('href')
+                self.link_product = urljoin(HOST_FOURFRESH, item.find('a').get('href'))
                 self.prise = item.find('div', class_='ci-actual-price').get_text(strip=True)
                 print(f'Товар на сайте {self.shope_name} найден.')
                 # print(link, prise)
                 self.record_info()
 
     def find_next_url(self):
-        self.link = HOST_FOURFRESH + self.contents.find('a', class_='next').get('href')
+        self.link = urljoin(HOST_FOURFRESH, self.contents.find('a', class_='next').get('href'))
 
     def run(self):
         self.html = requests.get(url=self.url, headers=self.headers, params=self.params)
